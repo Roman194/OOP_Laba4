@@ -5,16 +5,29 @@ import java.awt.event.ActionListener;
 import java.time.LocalTime;
 
 public class DrawClock extends JPanel {
+    boolean change = false;
+    int minuteDispetcher = 0;
+    int hourDispetcher= 0;
+
+    public void onClick(Integer action){ //on button click actions (calling from main)
+        switch(action){
+            case 0: change = !change; break;
+            case 1: if(change) minuteDispetcher+=1; else hourDispetcher+=1; break;
+            case 2: if(change) minuteDispetcher-=1; else hourDispetcher-=1; break;
+        }
+    }
+
     @Override
-    public Dimension getPreferredSize() {
+    public Dimension getPreferredSize() { //window size parameter
         return new Dimension(1000, 1000);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+
         Graphics2D g2d = (Graphics2D) g.create();
 
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.now(); //get current time
         int minutes = time.getMinute();
         int hours = time.getHour();
         int seconds = time.getSecond();
@@ -34,12 +47,20 @@ public class DrawClock extends JPanel {
         g2d.drawLine(0, 0, 0, -290);
         g2d.rotate(2 * Math.PI - seconds * Math.PI / 30);//to rotate pen to 12 hours (preparing for drawing minutes arrow)
 
-        g2d.rotate(minutes * Math.PI / 30); // minutes
+        if(change) //when minute arrow is chosen it will be highlighted
+            g2d.setColor(Color.CYAN);
+
+        g2d.rotate((minutes + minuteDispetcher) * Math.PI / 30); // minutes
         g2d.setStroke(new BasicStroke(3));
         g2d.drawLine(0, 0, 0, -250);
-        g2d.rotate(2 * Math.PI - minutes * Math.PI / 30); //to rotate pen to 12 hours (preparing for drawing hour arrow)
+        g2d.rotate(2 * Math.PI - (minutes + minuteDispetcher) * Math.PI / 30); //to rotate pen to 12 hours (preparing for drawing hour arrow)
 
-        g2d.rotate(hours * Math.PI / 6);//hours
+        if(!change) //same for hour arrow
+            g2d.setColor(Color.CYAN);
+        else
+            g2d.setColor(Color.WHITE);
+
+        g2d.rotate((hours + hourDispetcher) * Math.PI / 6);//hours
         g2d.setStroke(new BasicStroke(6));
         g2d.drawLine(0, 0, 0, -200);
 
@@ -48,6 +69,7 @@ public class DrawClock extends JPanel {
     }
 
     public DrawClock() {
+
         Timer timer = new Timer(500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
